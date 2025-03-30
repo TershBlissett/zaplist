@@ -1,88 +1,166 @@
-// After listCalendars(); inside handleAuthClick
-listCalendars().then(fetchCalendarEvents);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZapList: Daily Task Manager</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    input, select, button { margin: 0.5rem 0; padding: 0.5rem; font-size: 1rem; }
+    .task { margin-top: 1rem; border: 1px solid #ddd; padding: 1rem; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>ZapList: Daily Task Manager</h1>
 
-// Modified fetchCalendarEvents to mark existing events
-async function fetchCalendarEvents() {
-  const calendarId = document.getElementById('calendarSelect').value;
-  const now = new Date().toISOString();
-  const endOfDay = new Date();
-  endOfDay.setHours(23, 59, 59, 999);
-  const end = endOfDay.toISOString();
+  <button onclick="handleAuthClick()">Sign in with Google</button><br>
+  <select id="calendarSelect"></select><br>
+  <input id="taskInput" placeholder="Enter your task..." /><br>
+  <input id="dueDate" type="date" /><br>
+  <input id="dueTime" type="time" /><br>
+  <button onclick="createTask()">Add Task</button>
 
-  const response = await gapi.client.calendar.events.list({
-    calendarId,
-    timeMin: now,
-    timeMax: end,
-    showDeleted: false,
-    singleEvents: true,
-    orderBy: 'startTime'
-  });
+  <h2>Today's Tasks</h2>
+  <div id="taskList"></div>
 
-  const events = response.result.items || [];
-  const tasks = getTasks();
+  <script>
+    async function fetchCalendarEvents() {
+      const calendarId = document.getElementById('calendarSelect').value;
+      const now = new Date().toISOString();
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+      const end = endOfDay.toISOString();
 
-  events.forEach(event => {
-    if (!tasks.find(t => t.text === event.summary)) {
-      const dueDate = event.start.dateTime?.split('T')[0] || '';
-      const dueTime = event.start.dateTime?.split('T')[1]?.substring(0,5) || '';
-      tasks.push({
-        text: event.summary + ' 📅',
+      const response = await gapi.client.calendar.events.list({
+        calendarId,
+        timeMin: now,
+        timeMax: end,
+        showDeleted: false,
+        singleEvents: true,
+        orderBy: 'startTime'
+      });
+
+      const events = response.result.items || [];
+      const tasks = getTasks();
+
+      events.forEach(event => {
+        if (!tasks.find(t => t.text === event.summary)) {
+          const dueDate = event.start.dateTime?.split('T')[0] || '';
+          const dueTime = event.start.dateTime?.split('T')[1]?.substring(0,5) || '';
+          tasks.push({
+            text: event.summary + ' 📅',
+            dueDate,
+            dueTime,
+            done: false,
+            calendarId,
+            calendarName: document.getElementById('calendarSelect').selectedOptions[0].text,
+            fromCalendar: true
+          });
+        }
+      });
+
+      saveTasks(tasks);
+      renderTasks();
+    }
+
+    async function createTask() {
+      const calendarId = document.getElementById('calendarSelect').value;
+      const calendarName = document.getElementById('calendarSelect').selectedOptions[0].text;
+      const taskInput = document.getElementById('taskInput');
+      const dateInput = document.getElementById('dueDate');
+      const timeInput = document.getElementById('dueTime');
+
+      const text = taskInput.value.trim();
+      const dueDate = dateInput.value;
+      const dueTime = timeInput.value;
+      if (!text) return;
+
+      const task = {
+        text,
         dueDate,
         dueTime,
         done: false,
         calendarId,
-        calendarName: document.getElementById('calendarSelect').selectedOptions[0].text,
-        fromCalendar: true
+        calendarName
+      };
+
+      const tasks = getTasks();
+      tasks.push(task);
+      saveTasks(tasks);
+      renderTasks();
+
+      taskInput.value = '';
+      dateInput.value = '';
+      timeInput.value = '';
+
+      if (gapi.client && dueDate && dueTime) {
+        const startDateTime = new Date(`${dueDate}T${dueTime}:00`);
+        const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
+
+        await gapi.client.calendar.events.insert({
+          calendarId,
+          resource: {
+            summary: text,
+            start: { dateTime: startDateTime.toISOString() },
+            end: { dateTime: endDateTime.toISOString() }
+          }
+        });
+      }
+    }
+
+    function getTasks() {
+      return JSON.parse(localStorage.getItem('tasks') || '[]');
+    }
+
+    function saveTasks(tasks) {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      const list = document.getElementById('taskList');
+      list.innerHTML = '';
+      getTasks().forEach(task => {
+        const div = document.createElement('div');
+        div.className = 'task';
+        div.innerHTML = `${task.text}<br>Due: ${task.dueDate || 'undefined'} at ${task.dueTime || 'undefined'}`;
+        list.appendChild(div);
       });
     }
-  });
 
-  saveTasks(tasks);
-  renderTasks();
-}
+    function handleAuthClick() {
+      gapi.auth2.getAuthInstance().signIn().then(() => {
+        listCalendars().then(fetchCalendarEvents);
+      });
+    }
 
-// Add to createTask function: Push to Google Calendar if not fromCalendar
-async function createTask() {
-  const calendarId = document.getElementById('calendarSelect').value;
-  const calendarName = document.getElementById('calendarSelect').selectedOptions[0].text;
-  const taskInput = document.getElementById('taskInput');
-  const dateInput = document.getElementById('dueDate');
-  const timeInput = document.getElementById('dueTime');
+    function listCalendars() {
+      return gapi.client.calendar.calendarList.list().then(response => {
+        const select = document.getElementById('calendarSelect');
+        select.innerHTML = '';
+        response.result.items.forEach(cal => {
+          const option = document.createElement('option');
+          option.value = cal.id;
+          option.textContent = cal.summary;
+          select.appendChild(option);
+        });
+      });
+    }
 
-  const text = taskInput.value.trim();
-  const dueDate = dateInput.value;
-  const dueTime = timeInput.value;
-  if (!text) return;
+    function initClient() {
+      gapi.client.init({
+        apiKey: 'YOUR_API_KEY',
+        clientId: 'YOUR_CLIENT_ID',
+        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+        scope: 'https://www.googleapis.com/auth/calendar'
+      }).then(() => {
+        gapi.auth2.getAuthInstance();
+      });
+    }
 
-  const task = {
-    text,
-    dueDate,
-    dueTime,
-    done: false,
-    calendarId,
-    calendarName
-  };
-
-  const tasks = getTasks();
-  tasks.push(task);
-  saveTasks(tasks);
-  renderTasks();
-
-  taskInput.value = '';
-  dateInput.value = '';
-  timeInput.value = '';
-
-  if (gapi.client && dueDate && dueTime) {
-    const startDateTime = new Date(`${dueDate}T${dueTime}:00`);
-    const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
-
-    await gapi.client.calendar.events.insert({
-      calendarId,
-      resource: {
-        summary: text,
-        start: { dateTime: startDateTime.toISOString() },
-        end: { dateTime: endDateTime.toISOString() }
-      }
-    });
-  }
-}
+    function handleClientLoad() {
+      gapi.load('client:auth2', initClient);
+    }
+  </script>
+  <script async defer src="https://apis.google.com/js/api.js" onload="handleClientLoad()"></script>
+</body>
+</html>
