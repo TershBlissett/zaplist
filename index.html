@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZapList - Daily Task Manager</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; max-width: 600px; margin: auto; }
+    h1 { font-size: 1.8rem; }
+    input, select, button { padding: 0.5rem; margin: 0.5rem 0; width: 100%; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 0.5rem; border: 1px solid #ddd; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .task-complete { text-decoration: line-through; color: gray; }
+  </style>
+</head>
+<body>
+  <h1>ZapList: Daily Task Manager</h1>
+  <select id="business">
+    <option value="Service Emperor">Service Emperor</option>
+    <option value="TAPs">TAPs</option>
+    <option value="Skilled Trades Syndicate">Skilled Trades Syndicate</option>
+    <option value="Other">Other</option>
+  </select>
+  <input type="text" id="taskInput" placeholder="Enter your task...">
+  <button onclick="addTask()">Add Task</button>
+  <h2>Today's Tasks</h2>
+  <ul id="taskList"></ul>
+
+  <script>
+    const todayKey = new Date().toISOString().split('T')[0];
+
+    function getTasks() {
+      const tasks = JSON.parse(localStorage.getItem(todayKey)) || [];
+      return tasks;
+    }
+
+    function saveTasks(tasks) {
+      localStorage.setItem(todayKey, JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      const taskList = document.getElementById('taskList');
+      taskList.innerHTML = '';
+      getTasks().forEach((task, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="${task.done ? 'task-complete' : ''}">${task.business}: ${task.text}</span>
+          <button onclick="toggleTask(${index})">${task.done ? 'Undo' : 'Done'}</button>`;
+        taskList.appendChild(li);
+      });
+    }
+
+    function addTask() {
+      const taskInput = document.getElementById('taskInput');
+      const business = document.getElementById('business').value;
+      const text = taskInput.value.trim();
+      if (text) {
+        const tasks = getTasks();
+        tasks.push({ text, business, done: false });
+        saveTasks(tasks);
+        taskInput.value = '';
+        renderTasks();
+      }
+    }
+
+    function toggleTask(index) {
+      const tasks = getTasks();
+      tasks[index].done = !tasks[index].done;
+      saveTasks(tasks);
+      renderTasks();
+    }
+
+    // Carry forward unfinished tasks from yesterday
+    (function carryForward() {
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      const oldTasks = JSON.parse(localStorage.getItem(yesterday)) || [];
+      const todayTasks = getTasks();
+      const carriedTasks = oldTasks.filter(t => !t.done);
+      if (carriedTasks.length && todayTasks.length === 0) {
+        saveTasks(carriedTasks);
+      }
+    })();
+
+    renderTasks();
+  </script>
+</body>
+</html>
