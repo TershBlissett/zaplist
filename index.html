@@ -28,6 +28,7 @@
       padding: 0.5rem;
       font-size: 1rem;
       width: 100%;
+      box-sizing: border-box;
     }
     .task {
       margin-top: 1rem;
@@ -95,7 +96,7 @@
 
     async function createTask() {
       const calendarId = document.getElementById('calendarSelect').value;
-      const calendarName = document.getElementById('calendarSelect').selectedOptions[0].text;
+      const calendarName = document.getElementById('calendarSelect').selectedOptions[0]?.text || 'Unknown';
       const taskInput = document.getElementById('taskInput');
       const dateInput = document.getElementById('dueDate');
       const timeInput = document.getElementById('dueTime');
@@ -178,7 +179,7 @@
 
     function initClient() {
       gapi.client.init({
-        apiKey: 'AIzaSyCZfVjQaW1UraIUZrqKv0gvqDWe8d_OmPQ',
+        apiKey: 'AIzaSyDbAjcZCeTXvbRjAUeyFfLZCYe9AJzZ0PA',
         clientId: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com',
         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
         scope: 'https://www.googleapis.com/auth/calendar'
