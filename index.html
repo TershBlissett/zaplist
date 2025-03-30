@@ -22,6 +22,9 @@
       padding: 2rem;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     input, select, button {
       margin: 0.5rem 0;
@@ -36,6 +39,7 @@
       padding: 1rem;
       border-radius: 5px;
       background: #f1f1f1;
+      width: 100%;
     }
   </style>
 </head>
@@ -161,6 +165,8 @@
     function handleAuthClick() {
       gapi.auth2.getAuthInstance().signIn().then(() => {
         listCalendars().then(fetchCalendarEvents);
+      }).catch(error => {
+        console.error("Sign-in failed", error);
       });
     }
 
@@ -174,6 +180,8 @@
           option.textContent = cal.summary;
           select.appendChild(option);
         });
+      }).catch(error => {
+        console.error("Calendar list failed", error);
       });
     }
 
@@ -185,6 +193,8 @@
         scope: 'https://www.googleapis.com/auth/calendar'
       }).then(() => {
         gapi.auth2.getAuthInstance();
+      }).catch(error => {
+        console.error("Client initialization failed", error);
       });
     }
 
