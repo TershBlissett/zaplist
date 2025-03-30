@@ -5,10 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZapList: Daily Task Manager</title>
   <style>
-    body { font-family: sans-serif; padding: 2rem; display: flex; justify-content: center; }
-    .container { max-width: 600px; width: 100%; }
-    input, select, button { margin: 0.5rem 0; padding: 0.5rem; font-size: 1rem; width: 100%; }
-    .task { margin-top: 1rem; border: 1px solid #ddd; padding: 1rem; border-radius: 5px; }
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f9f9f9;
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      background: white;
+      padding: 2rem;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    input, select, button {
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 100%;
+    }
+    .task {
+      margin-top: 1rem;
+      border: 1px solid #ddd;
+      padding: 1rem;
+      border-radius: 5px;
+      background: #f1f1f1;
+    }
   </style>
 </head>
 <body>
@@ -151,8 +178,8 @@
 
     function initClient() {
       gapi.client.init({
-        apiKey: 'YOUR_API_KEY',
-        clientId: 'YOUR_CLIENT_ID',
+        apiKey: 'AIzaSyCZfVjQaW1UraIUZrqKv0gvqDWe8d_OmPQ',
+        clientId: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com',
         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
         scope: 'https://www.googleapis.com/auth/calendar'
       }).then(() => {
