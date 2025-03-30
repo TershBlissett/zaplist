@@ -189,20 +189,25 @@
     }
 
     function initClient() {
-      gapi.client.init({
-        apiKey: 'AIzaSyDbAjcZCeTXvbRjAUeyFfLZCYe9AJzZ0PA',
-        clientId: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com',
-        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
-        scope: 'https://www.googleapis.com/auth/calendar'
-      }).then(() => {
-        gapi.auth2.init();
-      }).catch(error => {
-        console.error("Client initialization failed", error);
+      gapi.load('client:auth2', () => {
+        gapi.client.init({
+          apiKey: 'AIzaSyDbAjcZCeTXvbRjAUeyFfLZCYe9AJzZ0PA',
+          clientId: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com',
+          discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+          scope: 'https://www.googleapis.com/auth/calendar'
+        }).then(() => {
+          if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+            signedIn = true;
+            listCalendars().then(fetchCalendarEvents);
+          }
+        }).catch(error => {
+          console.error("Client initialization failed", error);
+        });
       });
     }
 
     function handleClientLoad() {
-      gapi.load('client:auth2', initClient);
+      initClient();
     }
   </script>
   <script async defer src="https://apis.google.com/js/api.js" onload="handleClientLoad()"></script>
