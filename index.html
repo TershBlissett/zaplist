@@ -165,8 +165,7 @@
     }
 
     function handleAuthClick() {
-      const authInstance = gapi.auth2.getAuthInstance();
-      authInstance.signIn().then(() => {
+      gapi.auth2.getAuthInstance().signIn().then(() => {
         signedIn = true;
         console.log("Signed in successfully.");
         listCalendars().then(fetchCalendarEvents);
@@ -199,9 +198,8 @@
           discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
           scope: 'https://www.googleapis.com/auth/calendar'
         }).then(() => {
-          const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
-          signedIn = isSignedIn;
-          if (isSignedIn) {
+          signedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
+          if (signedIn) {
             console.log("Already signed in.");
             listCalendars().then(fetchCalendarEvents);
           } else {
