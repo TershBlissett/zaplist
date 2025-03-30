@@ -59,6 +59,8 @@
   </div>
 
   <script>
+    let signedIn = false;
+
     async function fetchCalendarEvents() {
       const calendarId = document.getElementById('calendarSelect').value;
       const now = new Date().toISOString();
@@ -128,7 +130,7 @@
       dateInput.value = '';
       timeInput.value = '';
 
-      if (gapi.client && dueDate && dueTime) {
+      if (signedIn && dueDate && dueTime) {
         const startDateTime = new Date(`${dueDate}T${dueTime}:00`);
         const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
 
@@ -164,6 +166,7 @@
 
     function handleAuthClick() {
       gapi.auth2.getAuthInstance().signIn().then(() => {
+        signedIn = true;
         listCalendars().then(fetchCalendarEvents);
       }).catch(error => {
         console.error("Sign-in failed", error);
@@ -192,7 +195,7 @@
         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
         scope: 'https://www.googleapis.com/auth/calendar'
       }).then(() => {
-        gapi.auth2.getAuthInstance();
+        gapi.auth2.init();
       }).catch(error => {
         console.error("Client initialization failed", error);
       });
