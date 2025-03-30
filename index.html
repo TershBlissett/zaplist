@@ -5,23 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZapList: Daily Task Manager</title>
   <style>
-    body { font-family: sans-serif; padding: 2rem; }
-    input, select, button { margin: 0.5rem 0; padding: 0.5rem; font-size: 1rem; }
+    body { font-family: sans-serif; padding: 2rem; display: flex; justify-content: center; }
+    .container { max-width: 600px; width: 100%; }
+    input, select, button { margin: 0.5rem 0; padding: 0.5rem; font-size: 1rem; width: 100%; }
     .task { margin-top: 1rem; border: 1px solid #ddd; padding: 1rem; border-radius: 5px; }
   </style>
 </head>
 <body>
-  <h1>ZapList: Daily Task Manager</h1>
+  <div class="container">
+    <h1>ZapList: Daily Task Manager</h1>
 
-  <button onclick="handleAuthClick()">Sign in with Google</button><br>
-  <select id="calendarSelect"></select><br>
-  <input id="taskInput" placeholder="Enter your task..." /><br>
-  <input id="dueDate" type="date" /><br>
-  <input id="dueTime" type="time" /><br>
-  <button onclick="createTask()">Add Task</button>
+    <button onclick="handleAuthClick()">Sign in with Google</button><br>
+    <select id="calendarSelect"></select><br>
+    <input id="taskInput" placeholder="Enter your task..." /><br>
+    <input id="dueDate" type="date" /><br>
+    <input id="dueTime" type="time" /><br>
+    <button onclick="createTask()">Add Task</button>
 
-  <h2>Today's Tasks</h2>
-  <div id="taskList"></div>
+    <h2>Today's Tasks</h2>
+    <div id="taskList"></div>
+  </div>
 
   <script>
     async function fetchCalendarEvents() {
