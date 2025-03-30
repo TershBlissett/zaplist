@@ -165,11 +165,14 @@
     }
 
     function handleAuthClick() {
-      gapi.auth2.getAuthInstance().signIn().then(() => {
+      const authInstance = gapi.auth2.getAuthInstance();
+      authInstance.signIn().then(() => {
         signedIn = true;
+        console.log("Signed in successfully.");
         listCalendars().then(fetchCalendarEvents);
       }).catch(error => {
         console.error("Sign-in failed", error);
+        alert("Google Sign-In failed: " + error.error);
       });
     }
 
@@ -196,12 +199,17 @@
           discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
           scope: 'https://www.googleapis.com/auth/calendar'
         }).then(() => {
-          if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-            signedIn = true;
+          const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
+          signedIn = isSignedIn;
+          if (isSignedIn) {
+            console.log("Already signed in.");
             listCalendars().then(fetchCalendarEvents);
+          } else {
+            console.log("Not signed in yet.");
           }
         }).catch(error => {
           console.error("Client initialization failed", error);
+          alert("Google API client initialization failed. Check API key, Client ID, and permissions.");
         });
       });
     }
