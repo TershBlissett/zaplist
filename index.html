@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZapList - Daily Task Manager</title>
   <style>
-    body { font-family: sans-serif; padding: 2rem; max-width: 600px; margin: auto; }
+    body { font-family: sans-serif; padding: 2rem; max-width: 700px; margin: auto; }
     h1 { font-size: 1.8rem; }
     input, select, button { padding: 0.5rem; margin: 0.5rem 0; width: 100%; }
     ul { list-style: none; padding: 0; }
-    li { padding: 0.5rem; border: 1px solid #ddd; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    li { padding: 0.5rem; border: 1px solid #ddd; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
     .task-complete { text-decoration: line-through; color: gray; }
+    .task-meta { font-size: 0.8rem; color: #555; margin-top: 0.25rem; }
   </style>
 </head>
 <body>
@@ -22,6 +23,8 @@
     <option value="Other">Other</option>
   </select>
   <input type="text" id="taskInput" placeholder="Enter your task...">
+  <input type="date" id="dueDate">
+  <input type="time" id="dueTime">
   <button onclick="addTask()">Add Task</button>
   <h2>Today's Tasks</h2>
   <ul id="taskList"></ul>
@@ -30,8 +33,7 @@
     const todayKey = new Date().toISOString().split('T')[0];
 
     function getTasks() {
-      const tasks = JSON.parse(localStorage.getItem(todayKey)) || [];
-      return tasks;
+      return JSON.parse(localStorage.getItem(todayKey)) || [];
     }
 
     function saveTasks(tasks) {
@@ -43,8 +45,13 @@
       taskList.innerHTML = '';
       getTasks().forEach((task, index) => {
         const li = document.createElement('li');
-        li.innerHTML = `<span class="${task.done ? 'task-complete' : ''}">${task.business}: ${task.text}</span>
-          <button onclick="toggleTask(${index})">${task.done ? 'Undo' : 'Done'}</button>`;
+        li.innerHTML = `
+          <span class="${task.done ? 'task-complete' : ''}">
+            ${task.business}: ${task.text}
+            <div class="task-meta">Due: ${task.dueDate} at ${task.dueTime}</div>
+          </span>
+          <button onclick="toggleTask(${index})">${task.done ? 'Undo' : 'Done'}</button>
+        `;
         taskList.appendChild(li);
       });
     }
@@ -52,13 +59,19 @@
     function addTask() {
       const taskInput = document.getElementById('taskInput');
       const business = document.getElementById('business').value;
+      const dueDate = document.getElementById('dueDate').value;
+      const dueTime = document.getElementById('dueTime').value;
       const text = taskInput.value.trim();
-      if (text) {
+      if (text && dueDate && dueTime) {
         const tasks = getTasks();
-        tasks.push({ text, business, done: false });
+        tasks.push({ text, business, dueDate, dueTime, done: false });
         saveTasks(tasks);
         taskInput.value = '';
+        document.getElementById('dueDate').value = '';
+        document.getElementById('dueTime').value = '';
         renderTasks();
+      } else {
+        alert('Please enter task, date, and time.');
       }
     }
 
