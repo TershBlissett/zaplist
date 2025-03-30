@@ -12,6 +12,7 @@
     li { padding: 0.5rem; border: 1px solid #ddd; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
     .task-complete { text-decoration: line-through; color: gray; }
     .task-meta { font-size: 0.8rem; color: #555; margin-top: 0.25rem; }
+    .actions { display: flex; gap: 0.5rem; }
   </style>
 </head>
 <body>
@@ -50,7 +51,10 @@
             ${task.business}: ${task.text}
             <div class="task-meta">Due: ${task.dueDate} at ${task.dueTime}</div>
           </span>
-          <button onclick="toggleTask(${index})">${task.done ? 'Undo' : 'Done'}</button>
+          <div class="actions">
+            <button onclick="toggleTask(${index})">${task.done ? 'Undo' : 'Done'}</button>
+            <button onclick="deleteTask(${index})">Delete</button>
+          </div>
         `;
         taskList.appendChild(li);
       });
@@ -78,6 +82,13 @@
     function toggleTask(index) {
       const tasks = getTasks();
       tasks[index].done = !tasks[index].done;
+      saveTasks(tasks);
+      renderTasks();
+    }
+
+    function deleteTask(index) {
+      const tasks = getTasks();
+      tasks.splice(index, 1);
       saveTasks(tasks);
       renderTasks();
     }
