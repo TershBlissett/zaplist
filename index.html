@@ -1,7 +1,7 @@
 // After listCalendars(); inside handleAuthClick
 listCalendars().then(fetchCalendarEvents);
 
-// Add this new function below listCalendars
+// Modified fetchCalendarEvents to mark existing events
 async function fetchCalendarEvents() {
   const calendarId = document.getElementById('calendarSelect').value;
   const now = new Date().toISOString();
@@ -31,11 +31,58 @@ async function fetchCalendarEvents() {
         dueTime,
         done: false,
         calendarId,
-        calendarName: document.getElementById('calendarSelect').selectedOptions[0].text
+        calendarName: document.getElementById('calendarSelect').selectedOptions[0].text,
+        fromCalendar: true
       });
     }
   });
 
   saveTasks(tasks);
   renderTasks();
+}
+
+// Add to createTask function: Push to Google Calendar if not fromCalendar
+async function createTask() {
+  const calendarId = document.getElementById('calendarSelect').value;
+  const calendarName = document.getElementById('calendarSelect').selectedOptions[0].text;
+  const taskInput = document.getElementById('taskInput');
+  const dateInput = document.getElementById('dueDate');
+  const timeInput = document.getElementById('dueTime');
+
+  const text = taskInput.value.trim();
+  const dueDate = dateInput.value;
+  const dueTime = timeInput.value;
+  if (!text) return;
+
+  const task = {
+    text,
+    dueDate,
+    dueTime,
+    done: false,
+    calendarId,
+    calendarName
+  };
+
+  const tasks = getTasks();
+  tasks.push(task);
+  saveTasks(tasks);
+  renderTasks();
+
+  taskInput.value = '';
+  dateInput.value = '';
+  timeInput.value = '';
+
+  if (gapi.client && dueDate && dueTime) {
+    const startDateTime = new Date(`${dueDate}T${dueTime}:00`);
+    const endDateTime = new Date(startDateTime.getTime() + 30 * 60000);
+
+    await gapi.client.calendar.events.insert({
+      calendarId,
+      resource: {
+        summary: text,
+        start: { dateTime: startDateTime.toISOString() },
+        end: { dateTime: endDateTime.toISOString() }
+      }
+    });
+  }
 }
