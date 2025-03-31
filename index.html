@@ -190,21 +190,15 @@
       });
     }
 
-   function initClient() {
+  function initClient() {
   gapi.load('client:auth2', () => {
     gapi.client.init({
-      apiKey: 'AIzaSyDbAjcZCeTXvbRjAUeyFfLZCYe9AJzZ0PA',
+      apiKey: 'AIzaSyB-aUzkd4IcstuWQWz_TAgLL_cBnOeWsro',
       clientId: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com',
       discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
       scope: 'https://www.googleapis.com/auth/calendar'
     }).then(() => {
-       //
-      gapi.auth2.init({
-        client_id: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com'
-      });
-
       signedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
-
       if (signedIn) {
         console.log("Already signed in.");
         listCalendars().then(fetchCalendarEvents);
