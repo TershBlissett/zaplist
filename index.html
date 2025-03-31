@@ -165,14 +165,18 @@
     }
 
     function handleAuthClick() {
-      gapi.auth2.getAuthInstance().signIn().then(() => {
-        signedIn = true;
-        console.log("Signed in successfully.");
-        listCalendars().then(fetchCalendarEvents);
-      }).catch(error => {
-        console.error("Sign-in failed", error);
-        alert("Google Sign-In failed: " + error.error);
-      });
+      if (gapi.auth2 && gapi.auth2.getAuthInstance()) {
+        gapi.auth2.getAuthInstance().signIn().then(() => {
+          signedIn = true;
+          console.log("Signed in successfully.");
+          listCalendars().then(fetchCalendarEvents);
+        }).catch(error => {
+          console.error("Sign-in failed", error);
+          alert("Google Sign-In failed: " + error.error);
+        });
+      } else {
+        alert("Google Auth instance not initialized. Please try again shortly.");
+      }
     }
 
     function listCalendars() {
