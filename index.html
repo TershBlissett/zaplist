@@ -47,7 +47,7 @@
   <div class="container">
     <h1>ZapList: Daily Task Manager</h1>
 
-    <button onclick="handleAuthClick()">Sign in with Google</button><br>
+    <button id="signInButton">Sign in with Google</button><br>
     <select id="calendarSelect"></select><br>
     <input id="taskInput" placeholder="Enter your task..." /><br>
     <input id="dueDate" type="date" /><br>
@@ -165,7 +165,13 @@
     }
 
     function handleAuthClick() {
-      gapi.auth2.getAuthInstance().signIn().then(() => {
+      const auth = gapi.auth2.getAuthInstance();
+      if (!auth) {
+        alert("Google Auth is not initialized yet. Try again in a moment.");
+        return;
+      }
+
+      auth.signIn().then(() => {
         signedIn = true;
         console.log("Signed in successfully.");
         listCalendars().then(fetchCalendarEvents);
@@ -190,25 +196,37 @@
       });
     }
 
-  function initClient() {
-  gapi.load('client:auth2', () => {
-    gapi.client.init({
-      apiKey: 'AIzaSyB-aUzkd4IcstuWQWz_TAgLL_cBnOeWsro',
-      clientId: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com',
-      discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
-      scope: 'https://www.googleapis.com/auth/calendar'
-    }).then(() => {
-      signedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
-      if (signedIn) {
-        console.log("Already signed in.");
-        listCalendars().then(fetchCalendarEvents);
-      } else {
-        console.log("Not signed in yet.");
-      }
-    }).catch(error => {
-      console.error("Client initialization failed", error);
-      alert("Google API client initialization failed. Check API key, Client ID, and permissions.");
-    });
-  });
-}
+    function initClient() {
+      gapi.load('client:auth2', () => {
+        gapi.client.init({
+          apiKey: 'AIzaSyB-aUzkd4IcstuWQWz_TAgLL_cBnOeWsro',
+          clientId: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com',
+          discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
+          scope: 'https://www.googleapis.com/auth/calendar.events.readonly https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar'
+        }).then(() => {
+          gapi.auth2.init({
+            client_id: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com'
+          });
+          signedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
+          if (signedIn) {
+            console.log("Already signed in.");
+            listCalendars().then(fetchCalendarEvents);
+          } else {
+            console.log("Not signed in yet.");
+          }
+        }).catch(error => {
+          console.error("Client initialization failed", error);
+          alert("Google API client initialization failed. Check API key, Client ID, and permissions.");
+        });
+      });
+    }
 
+    function handleClientLoad() {
+      initClient();
+    }
+
+    document.getElementById("signInButton").addEventListener("click", handleAuthClick);
+  </script>
+  <script async defer src="https://apis.google.com/js/api.js" onload="handleClientLoad()"></script>
+</body>
+</html>
