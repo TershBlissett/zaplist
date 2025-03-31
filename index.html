@@ -165,18 +165,14 @@
     }
 
     function handleAuthClick() {
-      if (gapi.auth2 && gapi.auth2.getAuthInstance()) {
-        gapi.auth2.getAuthInstance().signIn().then(() => {
-          signedIn = true;
-          console.log("Signed in successfully.");
-          listCalendars().then(fetchCalendarEvents);
-        }).catch(error => {
-          console.error("Sign-in failed", error);
-          alert("Google Sign-In failed: " + error.error);
-        });
-      } else {
-        alert("Google Auth instance not initialized. Please try again shortly.");
-      }
+      gapi.auth2.getAuthInstance().signIn().then(() => {
+        signedIn = true;
+        console.log("Signed in successfully.");
+        listCalendars().then(fetchCalendarEvents);
+      }).catch(error => {
+        console.error("Sign-in failed", error);
+        alert("Google Sign-In failed: " + error.error);
+      });
     }
 
     function listCalendars() {
@@ -200,11 +196,7 @@
           apiKey: 'AIzaSyB-aUzkd4IcstuWQWz_TAgLL_cBnOeWsro',
           clientId: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com',
           discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
-          scope: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.events.readonly https://www.googleapis.com/auth/calendar.settings.readonly'
-        }).then(() => {
-          return gapi.auth2.init({
-            client_id: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com'
-          });
+          scope: 'https://www.googleapis.com/auth/calendar'
         }).then(() => {
           signedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
           if (signedIn) {
@@ -221,7 +213,7 @@
     }
 
     function handleClientLoad() {
-      initClient();
+      gapi.load('client:auth2', initClient);
     }
 
     document.getElementById("signInButton").addEventListener("click", handleAuthClick);
