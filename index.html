@@ -165,13 +165,7 @@
     }
 
     function handleAuthClick() {
-      const auth = gapi.auth2.getAuthInstance();
-      if (!auth) {
-        alert("Google Auth is not initialized yet. Try again in a moment.");
-        return;
-      }
-
-      auth.signIn().then(() => {
+      gapi.auth2.getAuthInstance().signIn().then(() => {
         signedIn = true;
         console.log("Signed in successfully.");
         listCalendars().then(fetchCalendarEvents);
@@ -202,11 +196,12 @@
           apiKey: 'AIzaSyB-aUzkd4IcstuWQWz_TAgLL_cBnOeWsro',
           clientId: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com',
           discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
-          scope: 'https://www.googleapis.com/auth/calendar.events.readonly https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.settings.readonly'
+          scope: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.events.readonly https://www.googleapis.com/auth/calendar.settings.readonly'
         }).then(() => {
-          gapi.auth2.init({
+          return gapi.auth2.init({
             client_id: '151510460970-1ogdc6a9sjko4n82chs8mm8470lsu5au.apps.googleusercontent.com'
           });
+        }).then(() => {
           signedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
           if (signedIn) {
             console.log("Already signed in.");
